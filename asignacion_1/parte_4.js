@@ -2,18 +2,32 @@ var express = require('express');
 var app = express();
 
 
-app.get('/parte4', function(req, res) {
-	var hostArray = req.get('host').split(":");
+app.all('*', function(req, res) {
+	
+	var hostName = req.get('host');
+	var hostNameSplited = hostName.split(':'); 
 	var header = JSON.stringify(req.headers);
-	var responseJson = {
-		"Method" : req.method,
-		"Path" : req.path,
-		"Port" : hostArray[1],
-		"Headers": header
-	}
+	
+	/*
+	 Ref: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+	*/
+	var arr = Object.keys(req.headers).map(
+		function(h) { 
+			return req.headers[h].toString(); 
+		}
+	);
+
+	var responseJson = '{'
+		+'"method":"' + req.method + '",'
+        +'"host":"' + hostNameSplited[0] + '",'
+        +'"port":"' + hostNameSplited[1] + '",'
+        +'"path":"' + req.originalUrl + '",'
+        +'"header":"' + JSON.stringify(arr) + '"'
+        +'}';
+
 	res.send(responseJson);
 });
 
-app.listen(8082, function(){
-	console.log('listen 8082 port.');
-})
+app.listen(8082, function () {
+	console.log('LISTENING ON PORT: 8082');
+});
