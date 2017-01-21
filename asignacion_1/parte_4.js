@@ -11,7 +11,7 @@ app.get('/parte4', function(req, res) {
 		"Port" : hostArray[1],
 		"Headers": header
 	}
-	res.send(ResponseJson);
+	res.send(responseJson);
 });
 
 app.listen(8082, function(){
