@@ -8,16 +8,18 @@ app.all('*', function(req, res) {
 	var hostNameSplited = hostName.split(':'); 
 	var header = JSON.stringify(req.headers);
 	
-	var arr = Object.keys(req.headers).map( function(h) { 
-			return req.headers[h].toString(); 
-		});
+	var arrayHeader = Object.keys(req.headers).map(function(h) {
+		return req.headers[h].toString(); 
+	});
+
+	var headersJson = JSON.stringify(arrayHeader);
 
 	var responseJson = {
-		"method": req.method,
-        "host": hostNameSplited[0],
-        "port": hostNameSplited[1],
-        "path": req.originalUrl,
-        "header": JSON.stringify(arr)
+		"method" : req.method,
+        "host" : hostNameSplited[0],
+        "port" : hostNameSplited[1],
+        "path" : req.originalUrl,
+        "header" : headersJson
         }
 
 	res.send(responseJson);
