@@ -1,12 +1,13 @@
-var express = require('express')
-var app = express()
+var express = require('express');
+var app = express();
 
 
-app.post('/parte3', function (req, res) {
-	console.log(JSON.stringify(req.headers));
-})
+app.all('*', function (req, res) {
+	console.log("header: " + JSON.stringify(req.headers));
+});
 
 app.listen(8082, function () {
-	console.log('listen 8082 port.')
-})
+	console.log('LISTENING ON PORT: 8082');
+});
+
 

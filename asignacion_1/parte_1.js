@@ -1,25 +1,21 @@
-var express = require('express')
-var app = express()
+var express = require('express');
+var app = express();
 
-app.get('/', function (req, res) {
+app.all('*', function (req, res) {
   
+	var fullHostName = req.get('host');
+	var hostNameSplited = fullHostName.split(':'); 
 
-var host = req.get('host');
-var res = host.split(":"); 
+	console.log("protocol: " + req.protocol);
+	console.log("host: " + hostNameSplited[0]);
+	console.log("port: " + hostNameSplited[1]);
+	console.log("path: " + req.originalUrl);
 
-console.log(req.protocol)
-console.log(res[0])
-console.log(res[1])
-console.log(req.path)
-
-})
+});
 
 app.listen(8082, function () {
-  
-
-console.log('listen 8082 port.')
-
-})
+	console.log('LISTENING ON PORT: 8082');
+});
 
 
 
