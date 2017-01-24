@@ -27,7 +27,7 @@ app.all('*', function(req, res) {
         "path" : req.originalUrl,
         "header" : headerArray
         }
-
+s
 	res.send(responseJson);
 });
 
