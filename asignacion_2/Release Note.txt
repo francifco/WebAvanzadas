@@ -1,0 +1,10 @@
+
+Notas generales:
+En esta asignación, use la parte "app.all('*',...)", donde se espera cualquier cadena de caracteres('*'), en el path del URL, la cual fue implementado por Diego Mena. Me pareció más practico que mi implementación por ejemplo, en : "app.post('/parte2', ....)", "app.get('/parte3', ....)", etc, por el motivo de que había una dependencia en su totalidad de escribir los paths exactamente como: "/part2", "/part3" "/parte4", en los URL para poder ver los resultados esperados de dichos apéndices 1, 2, 3 y 4 de esta asignación 1.
+
+Units Tests:
+Luego de correr los test para evaluar cada parte de esta asignación fue una mucho mejor práctica que solo hacer la asignación y verificar si están correctas cada apéndice plateado a modo de ensayo y error, para luego subirlo al servidor. Por lo tanto en mi opinión sería mucho mejor tener el test de la asignación disponible antes de subir las implementaciones al servidor.
+
+
+
+
