@@ -6,7 +6,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/404", function(req, res) {
-	res.status(400);
+	res.status(404);
 	res.send();
 });
 
@@ -23,14 +23,12 @@ app.get("/error", function(req, res) {
 app.all("/notimplemented", function(req, res) {
 	
 	var currentMethods = req.method;
-	var methodsAllowed = ["GET","POST","PUT"];
+	var methodsAllowed = ['GET','POST','PUT'];
 	
 	if(methodsAllowed.indexOf(currentMethods) >= 0){
 		res.status(200);
-		res.send();
 	} else {
 		res.status(501);
-		res.send();
 	}
 	
 	res.set('Allow', methodsAllowed);
