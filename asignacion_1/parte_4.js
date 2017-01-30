@@ -22,7 +22,7 @@ redisClient.on('connect', function() {
     console.log('Redis connected');
 });
 
-var database = new sqlite3.Database(sqliteConfig.path, sqlite3.OPEN_READWRITE);
+var database = new sqlite.Database(configSqlite.path, sqlite.OPEN_READWRITE);
 var validUUID = true;
 var newFilePath = "";
 
@@ -127,7 +127,7 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
 //fecth all movies.
-app.get('/movies', function(req, res) {
+app.get('/movies/json', function(req, res) {
     database.serialize(function() {
         database.all("SELECT * FROM movies", function(err, row) {
             row.forEach(function(element) {
@@ -144,6 +144,20 @@ app.get('/movies', function(req, res) {
         });
     })
 });
+
+//get specific movie with id param. reference: Diego Mena.
+app.get('/movies/details/:id', function(req, res) {
+    database.serialize(function() {
+        database.get("SELECT * FROM movies where id = (?)", req.param("id"), function(err, row) {
+            row.imageCompressed = false;
+            row.keywords = row.keywords.split(',');
+            row.title = 'Movie App';
+            row.layoutTitle = 'My Movies';
+            res.render('detail', row);
+        });
+    });
+});
+
 
 
 
