@@ -99,11 +99,19 @@ app.post('/movies/create', upload.single('image'), function(req, res, next) {
         emptyInputs.image = true;
     }
 
-	//if all inputs are not empty. 
+	//if all inputs are not empty add movie to datebase.
 	if(!emptyInputs.name && !emptyInputs.description 
-	&& !emptyInputs.keyWords && emptyInputs.image) {
+	&& !emptyInputs.keyWords && !emptyInputs.image) {
 
-		
+		db.serialize(function() {
+        
+		while (!verifyUUID(newUUID)) {
+            newUUID = uuid();
+        }
+			var statement = db.prepare("INSERT INTO movies values (?,?,?,?,?)");
+			statement.run(newUUID, req.body.name, req.body.description, req.body.keywords, newFilePath);
+			statement.finalize();
+    	});
 
 		alert("Movie was added.");
 		res.redirect('/movies');
@@ -113,6 +121,8 @@ app.post('/movies/create', upload.single('image'), function(req, res, next) {
 	}
 
 });
+
+
 
 
 /*wa_ass 1 - 3*/ 
