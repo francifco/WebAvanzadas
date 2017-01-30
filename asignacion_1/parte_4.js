@@ -68,6 +68,7 @@ var handlebars = exphbs.create({
     ]
 });
 
+//add a new movie.
 app.post('/movies/create', upload.single('image'), function(req, res, next) {
 
 	var newUUID = uuid();
@@ -112,6 +113,29 @@ app.post('/movies/create', upload.single('image'), function(req, res, next) {
 		res.set(emptyInputs);
 	}
 
+});
+
+
+app.engine('handlebars', handlebars.engine);
+app.set('view engine', 'handlebars');
+
+//fecth all movies.
+app.get('/movies', function(req, res) {
+    database.serialize(function() {
+        database.all("SELECT * FROM movies", function(err, row) {
+            row.forEach(function(element) {
+                element.keywords = element.keywords.split(',');
+            }, this);
+            
+			var movies = {
+				title: "Movie App",
+                layoutTitle: "My Movies",
+                "movies": row
+			}
+
+			res.render(movies);
+        });
+    })
 });
 
 
