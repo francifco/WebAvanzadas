@@ -1,1 +1,6 @@
 /node_modules
+/database/movies.sqlite3
+/public
+.vscode
+/uploads/*
+
