@@ -1,2 +1,2 @@
 default:
-    path: './database/movies.sqlite3'
+    path: './db/movies.sqlite3'

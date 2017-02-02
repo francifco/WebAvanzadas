@@ -11,17 +11,17 @@ var exphbs = require('express-handlebars');
 var multer = require('multer')
 var mkdirp = require('mkdirp');
 var uuid = require('uuid-v4');
-var redis = require('redis');
+//var redis = require('redis');
 var sqlite = require('sqlite3');
 var configYalm = require('node-yaml-config');
-var configRedis = configYalm.load('./redis.yml');
+//var configRedis = configYalm.load('./redis.yml');
 var configSqlite = configYalm.load('./database.yml');
-var redisClient = redis.createClient(configRedis.port, configRedis.host);
-
+//var redisClient = redis.createClient(configRedis.port, configRedis.host);
+/*
 redisClient.on('connect', function() {
     console.log('Redis connected');
 });
-
+*/
 var database = new sqlite.Database(configSqlite.path, sqlite.OPEN_READWRITE);
 var validUUID = true;
 var newFilePath = "";
@@ -62,10 +62,12 @@ function verifyUUID(newUUID) {
 
 
 var handlebars = exphbs.create({
-    defaultLayout: 'main',
-    partialsDir: [
-        'views/partials/',
-    ]
+    defaultLayout: 'mainLayout'
+});
+
+
+app.get('/movies/create', function (req, res) {
+	res.render('newMovie');
 });
 
 //add a new movie.
@@ -74,51 +76,54 @@ app.post('/movies/create', upload.single('image'), function(req, res, next) {
 	var newUUID = uuid();
 	
 	var emptyInputs = {
-		"emptyName": false,
-		"nameFeetback": "Introduce a name.",
-		"description": false,
-		"descriptionFeetback": "Introduce a description.",
-		"image": false,
-		"imageFeetback": "Select a image.",
-		"keyWords":false,
-		"keyWordsFeetback": "Introduce some keyWords"
+		"emptyName": "",
+		"introduceName": "",
+		"emptyDescription": "",
+		"introduceDescription": "",
+		"emptyKeywords":"",
+		introduceKeywords: "",
+		"emptyImage": "",
+		"introduceImage": ""
 	}
 
 	if(req.body.name == "") {
-		emptyInputs.name = true;
+		emptyInputs.emptyName = "has-error";
+		emptyInputs.introduceName = "Introduce Name.";
 	} 
 
 	if(req.body.description == ""){
-		emptyInputs.description = true;
+		emptyInputs.emptyDescription = "has-error";
+		emptyInputs.introduceDescription = "Introduce description.";
 	}
 
-	if(req.body.keyWords == ""){
-		emptyInputs.keyWords = true;
+	if(req.body.keywords == ""){
+		emptyInputs.emptyKeywords = "has-error";
+		emptyInputs.introduceKeyword = "Introduce some keywords.";
 	}
 
 	if (!req.file) {
-        emptyInputs.image = true;
+        emptyInputs.emptyImage = "has-error";
+		emptyInputs.introduceImage = "Please select an image.";
     }
 
 	//if all inputs are not empty add movie to datebase.
-	if(!emptyInputs.name && !emptyInputs.description 
-	&& !emptyInputs.keyWords && !emptyInputs.image) {
+	if(!emptyInputs.emptyName && !emptyInputs.emptyDescription 
+	&& !emptyInputs.emptyKeywords && !emptyInputs.emptyImage) {
 
-		db.serialize(function() {
+		database.serialize(function() {
         
 		while (!verifyUUID(newUUID)) {
             newUUID = uuid();
         }
-			var statement = db.prepare("INSERT INTO movies values (?,?,?,?,?)");
+			var statement = database.prepare("INSERT INTO movies values (?,?,?,?,?)");
 			statement.run(newUUID, req.body.name, req.body.description, req.body.keywords, newFilePath);
 			statement.finalize();
     	});
 
-		alert("Movie was added.");
 		res.redirect('/movies');
 
 	} else {
-		res.set(emptyInputs);
+		res.render('newMovie', emptyInputs);
 	}
 
 });
@@ -126,23 +131,26 @@ app.post('/movies/create', upload.single('image'), function(req, res, next) {
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
-//fecth all movies.
-app.get('/movies/json', function(req, res) {
-    database.serialize(function() {
-        database.all("SELECT * FROM movies", function(err, row) {
-            row.forEach(function(element) {
-                element.keywords = element.keywords.split(',');
-            }, this);
-            
-			var movies = {
-				title: "Movie App",
-                layoutTitle: "My Movies",
-                "movies": row
-			}
 
-			res.render(movies);
-        });
-    })
+//fecth list of all movies.
+app.get('/movies/json', function(req, res) {
+	database.serialize(function() {
+        database.all("SELECT * FROM movies", function(err, row) {
+            res.send(row);    
+		});
+
+	});
+});
+
+
+//fecth list of all movies.
+app.get('/movies/list/json', function(req, res) {
+	database.serialize(function() {
+        database.all("SELECT * FROM movies", function(err, row) {
+            res.send(row);    
+		});
+
+	});
 });
 
 //get specific movie with id param. reference: Diego Mena.
@@ -152,13 +160,42 @@ app.get('/movies/details/:id', function(req, res) {
             row.imageCompressed = false;
             row.keywords = row.keywords.split(',');
             row.title = 'Movie App';
-            row.layoutTitle = 'My Movies';
-            res.render('detail', row);
+            row.layoutTitle = 'Detail movie:';
+            res.render('detailMovie', row);
         });
     });
 });
 
+app.get('/movies/list', function(req, res) {
+    database.serialize(function() {
+        database.all("SELECT * FROM movies", function(err, row) {
+            row.forEach(function(element) {
+                element.keywords = element.keywords.split(',');
+            }, this);
+            res.render('listMovies', {
+                title: "Movie App",
+                layoutTitle: "List movies:",
+                movies: row
+            });
+        });
+    })
+});
 
+
+app.get('/movies', function(req, res) {
+    database.serialize(function() {
+        database.all("SELECT * FROM movies", function(err, row) {
+            row.forEach(function(element) {
+                element.keywords = element.keywords.split(',');
+            }, this);
+            res.render('listMovies', {
+                title: "List movies:",
+                layoutTitle: "My Movies",
+                movies: row
+            });
+        });
+    })
+});
 
 
 /*wa_ass 1 - 3*/ 
