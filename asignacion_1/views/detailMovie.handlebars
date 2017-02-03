@@ -1,19 +1,19 @@
 <div class="col-md-12">
     <div class="row">
         <div class="col-md-3 form-group">
-            {{#if imageCompressed}}
-                <img src="{{imageC}}" class="Image">
-            {{else}}
-                <img src="{{image}}" class="Image">
-            {{/if}}
-        </div>
-        <div class="col-md-9">
             <div class="row">
-                <h3>{{name}}</h3>
+                <h1>{{name}}</h1>
             </div>
+
             <div class="row">
                 {{> keywords}}
             </div>
+            
+            {{#if imageCompressed}}
+                <img src="{{imageCompressed}}" class="Image">
+            {{else}}
+                <img src="{{image}}" class="Image">
+            {{/if}}
         </div>
     </div>
     <br>

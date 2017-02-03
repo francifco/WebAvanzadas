@@ -11,17 +11,19 @@ var exphbs = require('express-handlebars');
 var multer = require('multer')
 var mkdirp = require('mkdirp');
 var uuid = require('uuid-v4');
-//var redis = require('redis');
+var redis = require('redis');
 var sqlite = require('sqlite3');
 var configYalm = require('node-yaml-config');
-//var configRedis = configYalm.load('./redis.yml');
+var configRedis = configYalm.load('./redis.yml');
 var configSqlite = configYalm.load('./database.yml');
-//var redisClient = redis.createClient(configRedis.port, configRedis.host);
-/*
+var redisClient = redis.createClient(configRedis.port, configRedis.host);
+
+redisClient.auth(configRedis.authKey);
+
 redisClient.on('connect', function() {
     console.log('Redis connected');
 });
-*/
+
 var database = new sqlite.Database(configSqlite.path, sqlite.OPEN_READWRITE);
 var validUUID = true;
 var newFilePath = "";
@@ -59,7 +61,6 @@ function verifyUUID(newUUID) {
     });
     return validUUID;
 }
-
 
 var handlebars = exphbs.create({
     defaultLayout: 'mainLayout'
@@ -115,11 +116,12 @@ app.post('/movies/create', upload.single('image'), function(req, res, next) {
 		while (!verifyUUID(newUUID)) {
             newUUID = uuid();
         }
-			var statement = database.prepare("INSERT INTO movies values (?,?,?,?,?)");
+			var statement = database.prepare("INSERT INTO movies (id, name, description, keywords, image) values (?,?,?,?,?)");
 			statement.run(newUUID, req.body.name, req.body.description, req.body.keywords, newFilePath);
 			statement.finalize();
     	});
-
+		
+		redisClient.set('franci:resizeImage', "/images/"+req.file.filename);
 		res.redirect('/movies');
 
 	} else {
@@ -153,14 +155,10 @@ app.get('/movies/list/json', function(req, res) {
 	});
 });
 
-//get specific movie with id param. reference: Diego Mena.
+
 app.get('/movies/details/:id', function(req, res) {
     database.serialize(function() {
         database.get("SELECT * FROM movies where id = (?)", req.param("id"), function(err, row) {
-            row.imageCompressed = false;
-            row.keywords = row.keywords.split(',');
-            row.title = 'Movie App';
-            row.layoutTitle = 'Detail movie:';
             res.render('detailMovie', row);
         });
     });
@@ -190,7 +188,7 @@ app.get('/movies', function(req, res) {
             }, this);
             res.render('listMovies', {
                 title: "List movies:",
-                layoutTitle: "My Movies",
+                layoutTitle: "List movies:",
                 movies: row
             });
         });
@@ -249,10 +247,6 @@ app.post("/login", function (req, res) {
 });
 
 ///*****wa_ass 4******************** 
-
-
-
-
 
 
 ///*****wa_ass 3******************** 
