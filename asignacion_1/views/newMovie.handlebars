@@ -1,31 +1,35 @@
 <div class="row">
     <form action="/movies/create" method="POST" enctype="multipart/form-data">
+
+   <div class="form-group {{emptyImage}}">
+        <label for="idImage">Image:</label>
+        <input type="file" name="image" id="idImage">
+        <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+        <p class="help-block">Select a Image.</p>
+        <p><font color="red">{{introduceImage}}</font></p>
+    </div>
+
     <div class="form-group {{emptyName}}">
         <label for="idName">Name:</label>
         <input type="text" class="form-control" name="name" id="idName" value="{{name}}">
         <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
         <p><font color="red">{{introduceName}}</font></p>
     </div>
+
     <div class="form-group {{emptyDescription}}">
         <label for="idDescription">Description:</label>
         <textarea class="form-control" rows="10" name="description" id="idDescription">{{description}}</textarea>
         <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
        <p><font color="red">{{introduceDescription}}</font></p>
     </div>
+
     <div class="form-group {{emptyKeywords}}">
         <label for="idKeywords">Keywords:</label>
         <input class="form-control" type="text" value="{{keywords}}" name="keywords" data-role="tagsinput" id="idKeywords">
         <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
         <p><font color="red">{{introduceKeyword}}</font></p>
     </div>
-    <div class="form-group {{emptyImage}}">
-        <label for="idImage">Image:</label>
-        <input type="file" name="image" id="idImage">
-        <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
-        <p class="help-block">Select a Image.</p>
-        <p><font color="red">{{introduceImage}}</font></p>
-
-    </div>
+    
     <button type="submit" class="btn btn-default">Submit</button>
     </form>
 </div>
