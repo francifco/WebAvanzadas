@@ -7,7 +7,7 @@ var configRedis = configYalm.load('./redis.yml');
 var configSqlite = configYalm.load('./database.yml');
 var configTinify = configYalm.load('./tinify.yml');
 var tinify = require('tinify');
-var sharp = require('sharp');
+var jimp = require('jimp');
 var redisClient = redis.createClient(configRedis.port, configRedis.host);
 redisClient.auth(configRedis.authKey);
 var redisSubsClient = redis.createClient(configRedis.port, configRedis.host);
@@ -53,42 +53,56 @@ redisSubsClient.on('message', function(channel, key) {
                         console.log('Compressed image created.');
                     }
                 });
-                sharp(__dirname + '/public/' + fullPath).resize(80, 120, { centerSampling: true }).toFile(smallImagePath, function(err, info) {
-                    if (err) {
-                        console.error('Error creating small thumbnail image: ' + err);
-                    } else {
-                        database.serialize(function() {
-                            var statement = database.prepare("UPDATE movies set smallImage = (?) where image = (?)");
+                
+                jimp.read(__dirname + '/public/' + fullPath).then(function (lenna) {
+                    lenna.resize(80, 120)        // resize
+                    .quality(60)                 // set greyscale
+                    .write(smallImagePath);      // save
+
+                    database.serialize(function() {
+                        var statement = database.prepare("UPDATE movies set smallImage = (?) where image = (?)");
                             statement.run("/small_" + imageName, fullPath);
                             statement.finalize();
                         });
                         console.log('Small thumbnail image created.');
-                    }
+
+                }).catch(function (err) {
+                    console.error('Error creating small thumbnail image: ' + err);
                 });
-                sharp(__dirname + '/public/' + fullPath).resize(110, 170, { centerSampling: true }).toFile(mediumImagePath, function(err, info) {
-                    if (err) {
-                        console.error('Error creating medium thumbnail image: ' + err);
-                    } else {
-                        database.serialize(function() {
-                            var statement = database.prepare("UPDATE movies set mediumImage = (?) where image = (?)");
+
+   
+                jimp.read(__dirname + '/public/' + fullPath).then(function (lenna) {
+                    lenna.resize(110, 170)        // resize
+                    .quality(60).write(mediumImagePath);      // save
+
+                    database.serialize(function() {
+                        var statement = database.prepare("UPDATE movies set mediumImage = (?) where image = (?)");
                             statement.run("/medium_" + imageName, fullPath);
                             statement.finalize();
                         });
                         console.log('Medium thumbnail image created.');
-                    }
+
+                }).catch(function (err) {
+                    console.error('Error creating medium thumbnail image: ' + err);
                 });
-                sharp(__dirname + '/public/' + fullPath).resize(150, 210, { centerSampling: true }).toFile(largeImagePath, function(err, info) {
-                    if (err) {
-                        console.error('Error creating large thumbnail image: ' + err);
-                    } else {
-                        database.serialize(function() {
-                            var statement = database.prepare("UPDATE movies set largeImage = (?) where image = (?)");
+
+                jimp.read(__dirname + '/public/' + fullPath).then(function (lenna) {
+                    lenna.resize(110, 170)       // resize
+                    .quality(60)
+                    .write(largeImagePath);      // save
+
+                    database.serialize(function() {
+                        var statement = database.prepare("UPDATE movies set largeImage = (?) where image = (?)");
                             statement.run("/large_" + imageName, fullPath);
                             statement.finalize();
                         });
-                        console.log('Large thumbnail created.');
-                    }
+                    console.log('Large thumbnail image created.');
+
+                }).catch(function (err) {
+                    console.error('Error creating large thumbnail image: ' + err);
                 });
+       
+      
             } catch (err) {
                 console.error('Error creating thumbnails images: ' + err);
             }

@@ -1,20 +1,19 @@
 <div class="container">
-    
         <div class="row">
             {{#each movies}}
                <div class="col-lg-3 col-md-4 col-xs-6 thumb">
-                <a class="thumbnail" href="#">
-                    {{#if mediumThumbnail}} 
-                    <a href="/movies/details/{{id}}"/> <img class="img-responsive" src="{{smallImage}}" alt=""></a>
-                    {{else}}
-                    <a href="/movies/details/{{id}}"/> <img class="img-responsive" src="{{image}}" alt=""></a>
-                    {{/if}}
                     <td>{{name}}</td> 
-                    <td>{{description}}</td>
-                    <td>{{keywords}}</td>
-                </a>
+                    {{#if smallImage}} 
+                    <a href="/movies/details/{{id}}"/> <img class="thumbnail" src="{{smallImage}}" alt=""></a>
+                    {{else}}
+                    <a href="/movies/details/{{id}}"/> <img class="thumbnail" src="{{image}}" alt=""></a>
+                    {{/if}}
+                    <td>
+                        <div class="row">
+                        {{> keywords}}
+                        </div>
+                    </td>
             </div>
             {{/each}}
         </div>
- 
 </div>

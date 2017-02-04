@@ -18,6 +18,9 @@ var configRedis = configYalm.load('./redis.yml');
 var configSqlite = configYalm.load('./database.yml');
 var redisClient = redis.createClient(configRedis.port, configRedis.host);
 
+app.use(express.static('public'));
+app.use(express.static('generated'));
+
 redisClient.auth(configRedis.authKey);
 
 redisClient.on('connect', function() {
@@ -31,7 +34,8 @@ var newFilePath = "";
 /*wa_ass 1 - 3*/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+
 
 /*wa_ass 4*/ 
 var storageImage = multer.diskStorage({

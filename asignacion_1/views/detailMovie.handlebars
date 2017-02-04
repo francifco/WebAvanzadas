@@ -8,11 +8,10 @@
             <div class="row">
                 {{> keywords}}
             </div>
-            
-            {{#if imageCompressed}}
-                <img src="{{imageCompressed}}" class="Image">
+            {{#if compressedImage}}
+                <img src="{{compressedImage}}" class="img-responsive">
             {{else}}
-                <img src="{{image}}" class="Image">
+                <img src="{{image}}" class="img-responsive">
             {{/if}}
         </div>
     </div>
