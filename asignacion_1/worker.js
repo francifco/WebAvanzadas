@@ -41,6 +41,7 @@ redisSubsClient.on('message', function(channel, key) {
                 var smallImagePath = __dirname + "/generated/small_" + imageName;
                 var mediumImagePath = __dirname + "/generated/medium_" + imageName;
                 var largeImagePath = __dirname + "/generated/large_" + imageName;
+                
                 tinify.fromFile(__dirname + '/public/' + fullPath).toFile(compressedImagePath, function(err) {
                     if (err) {
                         console.error('Error creating compressed image: ' + err);
@@ -56,7 +57,7 @@ redisSubsClient.on('message', function(channel, key) {
                 
                 jimp.read(__dirname + '/public/' + fullPath).then(function (lenna) {
                     lenna.resize(80, 120)        // resize
-                    .quality(60)                 // set greyscale
+                    .quality(60)                 // set quality
                     .write(smallImagePath);      // save
 
                     database.serialize(function() {
@@ -73,7 +74,8 @@ redisSubsClient.on('message', function(channel, key) {
    
                 jimp.read(__dirname + '/public/' + fullPath).then(function (lenna) {
                     lenna.resize(110, 170)        // resize
-                    .quality(60).write(mediumImagePath);      // save
+                    .quality(60)                  // set quality
+                    .write(mediumImagePath);      // save
 
                     database.serialize(function() {
                         var statement = database.prepare("UPDATE movies set mediumImage = (?) where image = (?)");
@@ -88,7 +90,7 @@ redisSubsClient.on('message', function(channel, key) {
 
                 jimp.read(__dirname + '/public/' + fullPath).then(function (lenna) {
                     lenna.resize(110, 170)       // resize
-                    .quality(60)
+                    .quality(60)                 // set quality
                     .write(largeImagePath);      // save
 
                     database.serialize(function() {

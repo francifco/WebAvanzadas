@@ -3,10 +3,10 @@
             {{#each movies}}
                <div class="col-lg-3 col-md-4 col-xs-6 thumb">
                     <td>{{name}}</td> 
-                    {{#if smallImage}} 
-                    <a href="/movies/details/{{id}}"/> <img class="thumbnail" src="{{smallImage}}" alt=""></a>
+                    {{#if compressedImage}} 
+                    <a href="/movies/details/{{id}}"/> <img class="img-responsive" src="{{compressedImage}}" alt=""></a>
                     {{else}}
-                    <a href="/movies/details/{{id}}"/> <img class="thumbnail" src="{{image}}" alt=""></a>
+                    <a href="/movies/details/{{id}}"/> <img class="img-responsive" src="{{image}}" alt=""></a>
                     {{/if}}
                     <td>
                         <div class="row">

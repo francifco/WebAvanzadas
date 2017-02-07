@@ -162,7 +162,7 @@ app.get('/movies/list/json', function(req, res) {
 
 app.get('/movies/details/:id', function(req, res) {
     database.serialize(function() {
-        database.get("SELECT * FROM movies where id = (?)", req.param("id"), function(err, row) {
+        database.get("SELECT * FROM movies where id = (?)", req.params.id, function(err, row) {
             res.render('detailMovie', row);
         });
     });
