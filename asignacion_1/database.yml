@@ -1,2 +1,2 @@
 default:
-    path: './db/movies.sqlite3'
+    conectionString: 'mongodb://45.55.77.201/movies_franci'
