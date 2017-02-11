@@ -1,11 +1,13 @@
-var sqlite = require('sqlite3');
-var configYalm = require('node-yaml-config');
-var configSqlite = configYalm.load('./database.yml');
-var database = new sqlite.Database(configSqlite.path);
+var mongo = require('mongodb');
+var mongoClient = mongo.MongoClient;
+var yalmConfig = require('node-yaml-config');
+var mongoConfig = yalmConfig.load('./database.yml');
 
-database.serialize(function() {
-    database.run("CREATE TABLE movies (id TEXT PRIMARY KEY, name TEXT, description TEXT, keywords TEXT, image TEXT,"
-    +"compressedImage TEXT, smallImage TEXT, mediumImage TEXT, largeImage TEXT)");
+mongoClient.connect(mongoConfig.conectionString, function(err, db) {
+    if (err) {
+        return console.error(err);
+    }
+    db.createCollection('movies', function(err, collection) {});
+    return console.log('mongo database created.');
+    db.close();
 });
-
-database.close();

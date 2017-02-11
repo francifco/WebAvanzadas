@@ -1,18 +1,23 @@
 var express = require('express');
 var app = express();
 var redis = require('redis');
-var sqlite = require('sqlite3');
+
 var configYalm = require('node-yaml-config');
 var configRedis = configYalm.load('./redis.yml');
-var configSqlite = configYalm.load('./database.yml');
 var configTinify = configYalm.load('./tinify.yml');
+
+var mongo = require('mongodb');
+var mongoClient = mongo.MongoClient;
+var mongoConfig = configYalm.load('./database.yml');
+
 var tinify = require('tinify');
 var jimp = require('jimp');
+
 var redisClient = redis.createClient(configRedis.port, configRedis.host);
 redisClient.auth(configRedis.authKey);
 var redisSubsClient = redis.createClient(configRedis.port, configRedis.host);
 redisSubsClient.auth(configRedis.authKey);
-var database = new sqlite.Database(configSqlite.path, sqlite.OPEN_READWRITE);
+
 tinify.key = configTinify.key;
 var resizeImage = null;
 
@@ -46,12 +51,23 @@ redisSubsClient.on('message', function(channel, key) {
                     if (err) {
                         console.error('Error creating compressed image: ' + err);
                     } else {
-                        database.serialize(function() {
-                            var statement = database.prepare("UPDATE movies set compressedImage = (?) where image = (?)");
-                            statement.run("/compressed_" + imageName, fullPath);
-                            statement.finalize();
+                        
+                         mongoClient.connect(mongoConfig.conectionString, function(err, db) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            var collectionMovies = db.collection('movies');
+                            collectionMovies.update({ image: fullPath }, { $set: { compressedImage: "/compressed_" + imageName } },
+                                function(err, result) {
+                                    if (err) {
+                                        console.error(err);
+                                    } else {
+                                        console.log('Compressed image created.');
+                                    }
+                                    db.close();
+                                });
                         });
-                        console.log('Compressed image created.');
+
                     }
                 });
                 
@@ -60,12 +76,21 @@ redisSubsClient.on('message', function(channel, key) {
                     .quality(60)                 // set quality
                     .write(smallImagePath);      // save
 
-                    database.serialize(function() {
-                        var statement = database.prepare("UPDATE movies set smallImage = (?) where image = (?)");
-                            statement.run("/small_" + imageName, fullPath);
-                            statement.finalize();
-                        });
-                        console.log('Small thumbnail image created.');
+                    mongoClient.connect(mongoConfig.conectionString, function(err, db) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            var collectionMovies = db.collection('movies');
+                            collectionMovies.update({ image: fullPath }, { $set: { smallImage: "/small_" + imageName } },
+                                function(err, result) {
+                                    if (err) {
+                                        console.error(err);
+                                    } else {
+                                        console.log('Small image created');
+                                    }
+                                    db.close();
+                                });
+                    });
 
                 }).catch(function (err) {
                     console.error('Error creating small thumbnail image: ' + err);
@@ -77,12 +102,21 @@ redisSubsClient.on('message', function(channel, key) {
                     .quality(60)                  // set quality
                     .write(mediumImagePath);      // save
 
-                    database.serialize(function() {
-                        var statement = database.prepare("UPDATE movies set mediumImage = (?) where image = (?)");
-                            statement.run("/medium_" + imageName, fullPath);
-                            statement.finalize();
-                        });
-                        console.log('Medium thumbnail image created.');
+                    mongoClient.connect(mongoConfig.conectionString, function(err, db) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            var collectionMovies = db.collection('movies');
+                            collectionMovies.update({ image: fullPath }, { $set: { mediumImage: "/medium_" + imageName } },
+                                function(err, result) {
+                                    if (err) {
+                                        console.error(err);
+                                    } else {
+                                        console.log('Medium thumbnail image created');
+                                    }
+                                    db.close();
+                                });
+                    });
 
                 }).catch(function (err) {
                     console.error('Error creating medium thumbnail image: ' + err);
@@ -93,12 +127,21 @@ redisSubsClient.on('message', function(channel, key) {
                     .quality(60)                 // set quality
                     .write(largeImagePath);      // save
 
-                    database.serialize(function() {
-                        var statement = database.prepare("UPDATE movies set largeImage = (?) where image = (?)");
-                            statement.run("/large_" + imageName, fullPath);
-                            statement.finalize();
-                        });
-                    console.log('Large thumbnail image created.');
+                    mongoClient.connect(mongoConfig.conectionString, function(err, db) {
+                            if (err) {
+                                return console.error(err);
+                            }
+                            var collectionMovies = db.collection('movies');
+                            collectionMovies.update({ image: fullPath }, { $set: { largeImage: "/large_" + imageName } },
+                                function(err, result) {
+                                    if (err) {
+                                        console.error(err);
+                                    } else {
+                                        console.log('Large thumbnail image created');
+                                    }
+                                    db.close();
+                                });
+                    });
 
                 }).catch(function (err) {
                     console.error('Error creating large thumbnail image: ' + err);
