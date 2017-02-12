@@ -41,22 +41,37 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 /*wa_ass 4*/
 var storageImage = multer.diskStorage({
-	destination: function (req, file, cb) {
+	destination: function (req, file, callBack) {
 		var newDestination = '/public/images/';
 		mkdirp(__dirname + newDestination, function (err) {
-			cb(null, __dirname + newDestination);
+			callBack(null, __dirname + newDestination);
 		});
 	},
-	filename: function (req, file, cb) {
+	filename: function (req, file, callBack) {
 		var varFile = Date.now() + '_';
 		newFilePath = "/images/" + varFile + file.originalname;
-		cb(null, varFile + file.originalname);
+		callBack(null, varFile + file.originalname);
 	}
 });
 
 var upload = multer({
 	dest: '/uploads/',
 	storage: storageImage,
+});
+
+/*wa_ass 6*/
+var ionicStorage = multer.diskStorage({
+	destination: function (req, file, callBack) {
+		callBack(null, './public/img')
+	},
+	filename: function (req, file, callBack) {
+		callBack(null, file.originalname);
+	}
+});
+
+var ionicUpload = multer({
+	dest: '/uploads/',
+	storage: ionicStorage
 });
 
 
@@ -220,7 +235,7 @@ app.get('/movies/list/json', function (req, res) {
 	});
 });
 
-/*wa_ass 5*/
+/*wa_ass 6*/
 app.get('/image', function (req, res) {
 
 	var obj = '{"error": {"message":"no image defined", "code":"404" }}';
@@ -231,9 +246,9 @@ app.get('/image', function (req, res) {
 
 
 app.get(['/img/*', '/image/*'], function (req, res) {
-	if (fileExtra.existsSync(__dirname + '/public/imagesTaked/' + req.params[0])) {
+	if (fileExtra.existsSync(__dirname + '/public/img/' + req.params[0])) {
 		res.status(200);
-		res.sendFile(path.join(__dirname + '/public/imagesTaked/' + req.params[0]));
+		res.sendFile(path.join(__dirname + '/public/img/' + req.params[0]));
 	} else {
 		var obj = '{"error": {"message":"image no found, verify image name.", "code":"404" }}';
 		res.status(404);
@@ -241,8 +256,8 @@ app.get(['/img/*', '/image/*'], function (req, res) {
 	}
 });
 
-
-app.post('/image', function (req, res, next) {
+/*wa_ass 6*/
+app.post('/image', ionicUpload.single('image'), function (req, res, next) {
 
 	var conType = req.headers['content-type'];
 	var obj;
@@ -254,45 +269,20 @@ app.post('/image', function (req, res, next) {
 			res.status(400);
 		} else {
 
-			if (req.files != null && req.files.image != null && req.files.image.file != null) {
-
-				var image = req.files.image;
-
-				var filename = '';
-				var extension = '';
-
-				if (image.filename.indexOf('.') != -1) {
-					filename = image.filename.split('.');
-					extension = filename[filename.length - 1];
-				}
-
-				fileExtra.rename(image.file, '/public/imagesTaked/' + image.filename);
-
-				fileExtra.remove(image.file.split('image')[0], function (err) {
-
-					if (err) console.log(err);
-
-					else {
-						obj = '{"error": {"message":"Image uploaded.", "code":"200" }}';
-						res.status(200);
-					}
-				});
-			}
-
+			obj = '{"error": {"message":"Image uploaded.", "code":"200" }}';
+			res.status(200);
 		}
 
 	} else {
-
 		obj = '{"error": {"message":"Content type undefined.", "code":"400" }}';
 		res.status(400);
 	}
 
 	res.send(JSON.parse(obj));
-	
 });
 
 /*wa_ass 4*/
-app.get(['/movies/details','/movies/id'], function (req, res) {
+app.get(['/movies/details', '/movies/id'], function (req, res) {
 
 	var obj = '{"error": {"message":"id undefined", "code":"404" }}';
 	res.status(404);
@@ -321,7 +311,7 @@ app.get('/movies/details/*', function (req, res) {
 			var objectId = new mongo.ObjectID(id);
 
 			collectionMovies.findOne({ _id: objectId }, function (err, row) {
-				
+
 				if (err) {
 					var obj = '{"error": {"message":"id undefined", "code":"404" }}';
 					res.status(404);
