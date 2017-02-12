@@ -242,50 +242,61 @@ app.get(['/img/*', '/image/*'], function (req, res) {
 });
 
 
+
+
 app.post('/image', function (req, res, next) {
 
-	var contype = req.headers['content-type'];
+	var conType = req.headers['content-type'];
 	var obj;
 
-	if (contype.indexOf('multipart/form-data')!==0) {
-		obj = '{"error": {"message":"no image defined", "code":"400" }}';
-		res.status(400);
-	} else {
-		
-		if (req.files != null && req.files.image != null && req.files.image.file != null) {
+	if (typeof conType !== 'undefined') {
 
-			var image = req.files.image;
+		if (conType.indexOf('multipart/form-data') !== 0) {
+			obj = '{"error": {"message":"Content type most be: multipart/form-data.", "code":"400" }}';
+			res.status(400);
+		} else {
 
-            var filename = '';
-            var extension = '';
+			if (req.files != null && req.files.image != null && req.files.image.file != null) {
 
-            if (image.filename.indexOf('.') != -1) {
-                filename = image.filename.split('.');
-                extension = filename[filename.length - 1];
-            }
+				var image = req.files.image;
 
-			fileExtra.rename(image.file, '/public/imagesTaked/' + image.filename);
+				var filename = '';
+				var extension = '';
 
-            fileExtra.remove(image.file.split('image')[0], function (err) {
-                
-				if (err) console.log(err);
-                
-				else {
-					obj = '{"error": {"message":"image uploaded", "code":"200" }}';
-                    res.status(200);
-                    res.send();
-                }
-            });
+				if (image.filename.indexOf('.') != -1) {
+					filename = image.filename.split('.');
+					extension = filename[filename.length - 1];
+				}
+
+				fileExtra.rename(image.file, '/public/imagesTaked/' + image.filename);
+
+				fileExtra.remove(image.file.split('image')[0], function (err) {
+
+					if (err) console.log(err);
+
+					else {
+						obj = '{"error": {"message":"Image uploaded.", "code":"200" }}';
+						res.status(200);
+					}
+				});
+			}
+
 		}
-	
+
+	} else {
+
+		obj = '{"error": {"message":"Content type undefined.", "code":"400" }}';
+		res.status(400);
 	}
+
 	res.send(JSON.parse(obj));
+	
 });
 
 /*wa_ass 4*/
 app.get(['/movies/details','/movies/id'], function (req, res) {
 
-	var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
+	var obj = '{"error": {"message":"id undefined", "code":"404" }}';
 	res.status(404);
 	res.send(JSON.parse(obj));
 
@@ -297,7 +308,7 @@ app.get('/movies/details/*', function (req, res) {
 	var strId = id.toString();
 
 	if (strId.length < 24 || strId.length > 24) {
-		var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
+		var obj = '{"error": {"message":"id undefined", "code":"404" }}';
 		res.status(404);
 		res.send(JSON.parse(obj));
 
@@ -314,7 +325,7 @@ app.get('/movies/details/*', function (req, res) {
 			collectionMovies.findOne({ _id: objectId }, function (err, row) {
 				
 				if (err) {
-					var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
+					var obj = '{"error": {"message":"id undefined", "code":"404" }}';
 					res.status(404);
 					res.send(JSON.parse(obj));
 				} else {
