@@ -276,7 +276,7 @@ app.post('/image', takeImage.single('image'), function (req, res, next) {
 });
 
 /*wa_ass 4*/
-app.get('/movies/details/', function (req, res) {
+app.get(['/movies/details','/movies/id'], function (req, res) {
 
 	var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
 	res.status(404);
@@ -284,9 +284,9 @@ app.get('/movies/details/', function (req, res) {
 
 });
 
-app.get('/movies/details/:id', function (req, res) {
-	
-	var id = req.params.id;
+app.get('/movies/details/*', function (req, res) {
+
+	var id = req.params[0];
 	var strId = id.toString();
 
 	if (strId.length < 24 || strId.length > 24) {
