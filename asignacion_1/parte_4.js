@@ -57,6 +57,28 @@ var upload = multer({
 	storage: storageImage,
 });
 
+
+/*wa_ass 5*/
+var storageImageTaked = multer.diskStorage({
+	destination: function (req, file, cb) {
+		var newDestination = '/public/imagesTaked/';
+		mkdirp(__dirname + newDestination, function (err) {
+			cb(null, __dirname + newDestination);
+		});
+	},
+	filename: function (req, file, cb) {
+		newFilePath = "/imagesTaked/" + file.originalname;
+		cb(null, file.originalname);
+	}
+});
+
+var takeImage = multer({
+	dest: '/uploads/',
+	storage: storageImageTaked,
+});
+
+
+/*wa_ass 4*/
 var handlebars = exphbs.create({
 	defaultLayout: 'mainLayout'
 });
@@ -68,8 +90,6 @@ app.get('/movies/create', function (req, res) {
 
 //add a new movie.
 app.post('/movies/create', upload.single('image'), function (req, res, next) {
-
-	var newUUID = uuid();
 
 	var emptyInputs = {
 		"emptyName": "",
@@ -218,23 +238,89 @@ app.get('/movies/list/json', function (req, res) {
 	});
 });
 
+/*wa_ass 5*/
+app.get('/image', function (req, res) {
+
+	var obj = '{"error": {"message":"no image defined", "code":"404" }}';
+	res.status(404);
+	res.send(JSON.parse(obj));
+
+});
+
+app.get('/image/*', function (req, res) {
+
+	var obj = '{"error": {"message":"no image defined", "code":"404" }}';
+	res.status(200);
+	res.send(JSON.parse(obj));
+
+});
+
+
+app.post('/image', image, function (req, res, next) {
+
+	var contype = req.headers['content-type'];
+	var obj;
+
+	if (contype.indexOf('multipart/form-data')!==0) {
+		obj = '{"error": {"message":"no image defined", "code":"404" }}';
+		res.status(400);
+	} else {
+
+		console.log("imagen subida:" + image);
+		//takeImage.single('image');
+		///debe de guardar la imagen subida en la bd.
+		obj = '{"error": {"message":"image uploaded", "code":"200" }}';
+		res.status(200);
+	}
+	res.send(JSON.parse(obj));
+});
+
+/*wa_ass 4*/
+app.get('/movies/details', function (req, res) {
+
+	var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
+	res.status(404);
+	res.send(JSON.parse(obj));
+
+});
 
 app.get('/movies/details/:id', function (req, res) {
 
-	mongoClient.connect(mongoConfig.conectionString, function (err, db) {
-		if (err) {
-			return console.error(err);
-		}
-		var collectionMovies = db.collection('movies');
+	var id = req.params.id;
+	if (id.length == 0) {
 		
-		 var objectId = new mongo.ObjectID(req.params.id);
+		console.log("no trajo nada");
 
-		collectionMovies.findOne({ _id: objectId }, function (err, row) {
+		var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
+          res.status(404);
+          res.send(JSON.parse(obj));
 
-			res.render('detailMovie', row);
-			db.close();
+	} else {
+
+		mongoClient.connect(mongoConfig.conectionString, function (err, db) {
+			if (err) {
+				return console.error(err);
+			}
+			var collectionMovies = db.collection('movies');
+
+			var objectId = new mongo.ObjectID(req.params.id);
+
+			collectionMovies.findOne({ _id: objectId }, function (err, row) {
+				
+				if (err) {
+					var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
+					res.status(404);
+					res.send(JSON.parse(obj));
+				} else {
+					res.render('detailMovie', row);
+					db.close();
+				}
+			});
 		});
-	});
+
+	}
+
+
 });
 
 app.get('/movies/list', function (req, res) {
