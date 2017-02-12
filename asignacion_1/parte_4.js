@@ -242,8 +242,6 @@ app.get(['/img/*', '/image/*'], function (req, res) {
 });
 
 
-
-
 app.post('/image', function (req, res, next) {
 
 	var conType = req.headers['content-type'];
