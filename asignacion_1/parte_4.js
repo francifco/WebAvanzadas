@@ -249,7 +249,7 @@ app.get('/image', function (req, res) {
 
 app.get('/image/*', function (req, res) {
 
-	var obj = '{"error": {"message":"no image defined", "code":"404" }}';
+	var obj = '{"error": {"message":"image name", "code":"200" }}';
 	res.status(200);
 	res.send(JSON.parse(obj));
 
@@ -263,7 +263,7 @@ app.post('/image', takeImage.single('image'), function (req, res, next) {
 	var obj;
 
 	if (contype.indexOf('multipart/form-data')!==0) {
-		obj = '{"error": {"message":"no image defined", "code":"404" }}';
+		obj = '{"error": {"message":"no image defined", "code":"400" }}';
 		res.status(400);
 	} else {
 
@@ -276,7 +276,7 @@ app.post('/image', takeImage.single('image'), function (req, res, next) {
 });
 
 /*wa_ass 4*/
-app.get('/movies/details', function (req, res) {
+app.get('/movies/details/', function (req, res) {
 
 	var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
 	res.status(404);
@@ -285,15 +285,14 @@ app.get('/movies/details', function (req, res) {
 });
 
 app.get('/movies/details/:id', function (req, res) {
-
+	
 	var id = req.params.id;
-	if (id.length == 0) {
-		
-		console.log("no trajo nada");
+	var strId = id.toString();
 
+	if (strId.length < 24 || strId.length > 24) {
 		var obj = '{"error": {"message":"no id undefined", "code":"404" }}';
-          res.status(404);
-          res.send(JSON.parse(obj));
+		res.status(404);
+		res.send(JSON.parse(obj));
 
 	} else {
 
@@ -303,7 +302,7 @@ app.get('/movies/details/:id', function (req, res) {
 			}
 			var collectionMovies = db.collection('movies');
 
-			var objectId = new mongo.ObjectID(req.params.id);
+			var objectId = new mongo.ObjectID(id);
 
 			collectionMovies.findOne({ _id: objectId }, function (err, row) {
 				
