@@ -26,6 +26,12 @@ const fileExtra = require('fs-extra');
 app.use(express.static('public'));
 app.use(express.static('generated'));
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 redisClient.auth(configRedis.authKey);
 
 redisClient.on('connect', function () {
