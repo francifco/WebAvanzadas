@@ -256,7 +256,8 @@ app.get('/image/*', function (req, res) {
 });
 
 
-app.post('/image', image, function (req, res, next) {
+
+app.post('/image', takeImage.single('image'), function (req, res, next) {
 
 	var contype = req.headers['content-type'];
 	var obj;
@@ -267,7 +268,6 @@ app.post('/image', image, function (req, res, next) {
 	} else {
 
 		console.log("imagen subida:" + image);
-		//takeImage.single('image');
 		///debe de guardar la imagen subida en la bd.
 		obj = '{"error": {"message":"image uploaded", "code":"200" }}';
 		res.status(200);
