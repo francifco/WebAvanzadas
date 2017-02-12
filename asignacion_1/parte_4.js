@@ -20,6 +20,8 @@ var redisClient = redis.createClient(configRedis.port, configRedis.host);
 var mongo = require('mongodb');
 var mongoClient = mongo.MongoClient;
 var mongoConfig = configYalm.load('./database.yml');
+const fileExtra = require('fs-extra');
+
 
 app.use(express.static('public'));
 app.use(express.static('generated'));
@@ -55,26 +57,6 @@ var storageImage = multer.diskStorage({
 var upload = multer({
 	dest: '/uploads/',
 	storage: storageImage,
-});
-
-
-/*wa_ass 5*/
-var storageImageTaked = multer.diskStorage({
-	destination: function (req, file, cb) {
-		var newDestination = '/public/imagesTaked/';
-		mkdirp(__dirname + newDestination, function (err) {
-			cb(null, __dirname + newDestination);
-		});
-	},
-	filename: function (req, file, cb) {
-		newFilePath = "/imagesTaked/" + file.originalname;
-		cb(null, file.originalname);
-	}
-});
-
-var takeImage = multer({
-	dest: '/uploads/',
-	storage: storageImageTaked,
 });
 
 
@@ -247,17 +229,20 @@ app.get('/image', function (req, res) {
 
 });
 
-app.get('/image/*', function (req, res) {
 
-	var obj = '{"error": {"message":"image name", "code":"200" }}';
-	res.status(200);
-	res.send(JSON.parse(obj));
-
+app.get(['/img/*', '/image/*'], function (req, res) {
+	if (fileExtra.existsSync(__dirname + '/public/imagesTaked/' + req.params[0])) {
+		res.status(200);
+		res.sendFile(path.join(__dirname + '/public/imagesTaked/' + req.params[0]));
+	} else {
+		var obj = '{"error": {"message":"image no found, verify image name.", "code":"404" }}';
+		res.status(404);
+		res.send(JSON.parse(obj));
+	}
 });
 
 
-
-app.post('/image', takeImage.single('image'), function (req, res, next) {
+app.post('/image', function (req, res, next) {
 
 	var contype = req.headers['content-type'];
 	var obj;
@@ -266,11 +251,33 @@ app.post('/image', takeImage.single('image'), function (req, res, next) {
 		obj = '{"error": {"message":"no image defined", "code":"400" }}';
 		res.status(400);
 	} else {
+		
+		if (req.files != null && req.files.image != null && req.files.image.file != null) {
 
-		console.log("imagen subida:" + image);
-		///debe de guardar la imagen subida en la bd.
-		obj = '{"error": {"message":"image uploaded", "code":"200" }}';
-		res.status(200);
+			var image = req.files.image;
+
+            var filename = '';
+            var extension = '';
+
+            if (image.filename.indexOf('.') != -1) {
+                filename = image.filename.split('.');
+                extension = filename[filename.length - 1];
+            }
+
+			fileExtra.rename(image.file, '/public/imagesTaked/' + image.filename);
+
+            fileExtra.remove(image.file.split('image')[0], function (err) {
+                
+				if (err) console.log(err);
+                
+				else {
+					obj = '{"error": {"message":"image uploaded", "code":"200" }}';
+                    res.status(200);
+                    res.send();
+                }
+            });
+		}
+	
 	}
 	res.send(JSON.parse(obj));
 });
